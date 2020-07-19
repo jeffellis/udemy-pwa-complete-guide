@@ -36,7 +36,7 @@ PWAs bring the best of both worlds.
 legacy apps and work on legacy browsers.
 - Greenfield apps can be written from scratch to take adavantage of more PWA features
 
-## The Manifest
+# The Manifest
 - manifest.json in root directory
 - controls the PWA experience when installed on the homescreen
 
@@ -116,4 +116,36 @@ Note: some of these may be picked up in the manifest now
 ### IE also has meta tags if anyone cares
 Edge will support manifest.json
 
+--- 
+# Service Workers
 
+- Service workers run in a separate JS thread from the script loaded on the page. All service workers share the same thread though.
+- Manages all pages of a given scope (e.g. all pages of a domain)
+- Lives on even after pages have been closed (background processes run in the background)
+- Cannot interact with the DOM
+
+What Can they do?
+- Listen to specific events and react
+
+Service workers only work via https. The only exception is localhost
+
+## Service Worker Events
+- Fetch - Browser or page related js initiates a fetch request (SW acts as a network proxy). Fetch is NOT triggered via AXIOS or other AJAX requests
+- Push Notifications - SW receives web push notification (from server)
+- Notification Interaction - User interacts with displayed notification
+- Background Synchronization - SW receives background sync event (e.g. internet connection restored)
+- Service Worker Lifecycle
+
+## Service Worker Lifecycle
+- Install Event - Only happens the first time or when a changed SW is detected
+- Activate Event - new SW will only be activated after any older SWs for the scope are terminated. When this event is received the new SW now controls all pages of scope.
+- Idle - nothing to do
+- Terminated
+- Fetch
+
+## Debugging Using Chrome and Android Studio
+- Enable developer mode on emulated device by tapping the Android Build Number 7 times
+- Browse to chrome://inspect/#devices in desktop chrome and select the desired target
+- Setup port forwarding
+- Enter URL in the box
+- New dev tools window should open linked to the device

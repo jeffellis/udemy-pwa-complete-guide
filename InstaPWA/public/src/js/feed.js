@@ -2,8 +2,24 @@ var shareImageButton = document.querySelector('#share-image-button');
 var createPostArea = document.querySelector('#create-post');
 var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
 
-function openCreatePostModal() {
+function openCreatePostModal(event) {
   createPostArea.style.display = 'block';
+  if (deferredPrompt) {
+
+    // Show install banner if it was deferred earlier
+    deferredPrompt.prompt(event);
+
+    deferredPrompt.userChoice.then(function(choiceResult) {
+      console.log(choiceResult.outcome);
+      if (choiceResult.outcome === 'dismissed') {
+        console.log('User cancelled installation');
+      } else {
+        console.log("User added to home screen");
+      }
+
+      deferredPrompt = null;
+    })
+  }
 }
 
 function closeCreatePostModal() {
