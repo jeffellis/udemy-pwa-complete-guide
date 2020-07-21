@@ -206,3 +206,86 @@ xhr.send();
 # Section 5: Service Workers - Caching
 
 - Cache API: https://developer.mozilla.org/en-US/docs/Web/API/Cache
+
+### Pre-Caching
+```
+self.addEventListener('install', function(event) {
+  console.log('[Service Worker] Installing Service Worker ...', event);
+  event.waitUntil(
+      caches.open('static')
+      .then(function(cache) {
+        console.log('[Service Worker]: Pre-caching app shell!');
+
+        // NOTE: Requests are stored exactly. Make sure to cache '/' 
+        cache.addAll([
+          '/',
+          '/manifest.json',
+          '/index.html',
+          '/src/js/app.js',
+          '/src/js/feed.js',
+          '/src/js/material.min.js',
+          '/src/css/app.css',
+          '/src/css/feed.css',
+          '/src/images/main-image.jpg',
+          'https://fonts.googleapis.com/css?family=Roboto:400,700',
+          'https://fonts.googleapis.com/icon?family=Material+Icons',
+          'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css',
+
+          // No real reason to store these polyfills since they are only 
+          // needed for browsers that do not support service workers. There is
+          // a slight perf improvement for caching them since all browsers have to
+          // load them.
+          '/src/js/promise.js',
+          '/src/js/fetch.js'
+
+          // No need to cache icons since we probably don't care about A2HS when
+          // offline
+        ]);
+      })
+  );
+});
+```
+
+### Dynamic Caching
+
+```
+self.addEventListener('fetch', function(event) {
+  // Return cached content if available
+  event.respondWith(
+      caches.match(event.request)
+      .then(function(response) {
+        if (response) {
+            return response;
+        } else {
+          return fetch(event.request)
+            .then(function (res) {
+              return caches.open(CACHE_DYNAMIC_NAME)
+                .then(function (cache) {
+
+                  // Can only consume res once, so clone it into
+                  // the cache.
+                  cache.put(event.request.url, res.clone());
+                  return res;
+              })
+            })
+            .catch(function(err) {
+            
+            });
+        }
+      })
+  );
+});
+```
+
+- Be careful this data can get stale unless the sw is changed. One approach is to "version" the cache names.
+
+### Resources
+- About Cache Persistence and Storage Limits: https://jakearchibald.com/2014/offline-cookbook/#cache-persistence
+- Learn more about Service Workers: https://developer.mozilla.org/en/docs/Web/API/Service_Worker_API
+- Google's Introduction to Service Workers: https://developers.google.com/web/fundamentals/getting-started/primers/service-workers
+
+
+---
+# Section 6: Service Workers - Advanced Caching
+
+
