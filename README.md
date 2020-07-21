@@ -201,6 +201,8 @@ xhr.onerror = function() {
 }
 xhr.send();
 ```
+
 ---
 # Section 5: Service Workers - Caching
 
+- Cache API: https://developer.mozilla.org/en-US/docs/Web/API/Cache
