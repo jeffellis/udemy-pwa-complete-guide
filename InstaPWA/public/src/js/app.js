@@ -1,3 +1,11 @@
+// Apply polyfills if needed
+if (!window.Promise) {
+    window.Promise = Promise;
+}
+if (!window.fetch) {
+    window.fetch = fetch;
+}
+
 // Are service workers supported?
 if ('serviceWorker' in navigator) {
 
@@ -16,4 +24,4 @@ window.addEventListener('beforeinstallprompt', function(event) {
     event.preventDefault();
     deferredPrompt = event;
     return false;
-})
+});

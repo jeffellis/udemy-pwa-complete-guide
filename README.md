@@ -149,3 +149,58 @@ Service workers only work via https. The only exception is localhost
 - Setup port forwarding
 - Enter URL in the box
 - New dev tools window should open linked to the device
+
+---
+# Section 4: Promises and the Fetch API
+
+```
+// Fetch promise example
+fetch('https://httpbin.org/ip')
+    .then(function(response) {
+        console.log(response);
+        return response.json();
+    })
+    .then(function(data) {
+        console.log(data);
+    })
+    .catch(function(err) {
+        console.log(err);
+    });
+
+fetch('https://httpbin.org/post', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+        message: 'Does this work?'
+    }),
+    mode: 'cors' // cors or no-cors
+})
+    .then(function(response) {
+        console.log(response);
+        return response.json();
+    })
+    .then(function(data) {
+        console.log(data);
+    })
+    .catch(function(err) {
+        console.log(err);
+    });    
+
+// The XHR way
+var xhr = new XMLHttpRequest();
+xhr.open('GET', 'https://httpbin.org/ip');
+xhr.responseType = 'json';
+xhr.onload = function () {
+    console.log('XHR:', xhr.response);
+}    
+xhr.onerror = function() {
+    console.log('XHR: Error');
+}
+xhr.send();
+```
+---
+# Section 5: Service Workers - Caching
+
