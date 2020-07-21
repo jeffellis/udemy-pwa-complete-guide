@@ -206,6 +206,12 @@ xhr.send();
 # Section 5: Service Workers - Caching
 
 - Cache API: https://developer.mozilla.org/en-US/docs/Web/API/Cache
+- Check for cache availability in browser:
+```
+if ('caches' in window) {
+  // cache api available
+}
+```
 
 ### Pre-Caching
 ```
@@ -270,6 +276,7 @@ self.addEventListener('fetch', function(event) {
             })
             .catch(function(err) {
             
+              // Possibly return a fallback page here
             });
         }
       })
@@ -288,4 +295,32 @@ self.addEventListener('fetch', function(event) {
 ---
 # Section 6: Service Workers - Advanced Caching
 
+- Cache on Demand - resources can be added to the caches from regular JS code too
+- A fallback page can be pulled from the cache and offered when the network is not available or other errors occur
 
+## Strategies
+
+### Cache with Network Fallback
+- When page makes a request, SW looks in the cache first. If not found, fetch and cache from network. Bad for resources that change often.
+
+### Cache Only
+- Resources come from cache or fail
+- Only good for special static assets
+
+### Network Only
+- No benefits from caching, doesn't work at all off line
+
+### Network With Cache Fallback
+- Try network first
+- Check cache if that fails
+- Network request may take some time to fail
+
+### Cache Then Network
+- Page tries the cache directly (without service worker)
+- Page simultaneously does a fetch to hit the service worker
+- SW forwards network request, stores it in the cache, and returns data to page
+
+### Cache then Network with Offline Support
+
+### Cache Strategies & "Routing"
+ 
