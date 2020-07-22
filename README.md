@@ -300,27 +300,117 @@ self.addEventListener('fetch', function(event) {
 
 ## Strategies
 
+
+
+
+
+
 ### Cache with Network Fallback
 - When page makes a request, SW looks in the cache first. If not found, fetch and cache from network. Bad for resources that change often.
+
+```
+function cacheWithNetworkFallback(event) {
+  return caches.match(event.request)
+    .then(function (response) {
+      if (response) {
+        return response;
+      } else {
+        return fetch(event.request)
+          .then(function (res) {
+            return caches.open(CACHE_DYNAMIC_NAME)
+              .then(function (cache) {
+                cache.put(event.request.url, res.clone());
+                return res;
+              });
+          })
+          .catch(function (err) {
+
+          });
+      }
+    });
+}
+```
 
 ### Cache Only
 - Resources come from cache or fail
 - Only good for special static assets
 
+```
+function cacheOnly(event) {
+  return caches.match(event.request);
+};
+```
+
 ### Network Only
 - No benefits from caching, doesn't work at all off line
+
+```
+function networkOnly(event) {
+  return fetch(event.request);
+}
+```
 
 ### Network With Cache Fallback
 - Try network first
 - Check cache if that fails
 - Network request may take some time to fail
 
+```
+function networkWithCacheFallback(event) {
+  return fetch(event.request)
+    .then(function (res) {
+      caches.open(CACHE_DYNAMIC_NAME)
+        .then(function (cache) {
+          cache.put(event.request.url, res.clone())
+          return res;
+        });
+    })
+    .catch(function (err) {
+      return caches.match(event.request.url);
+    });
+};
+```
+
 ### Cache Then Network
 - Page tries the cache directly (without service worker)
 - Page simultaneously does a fetch to hit the service worker
 - SW forwards network request, stores it in the cache, and returns data to page
-
-### Cache then Network with Offline Support
+- Page updates with response from network
+- Requires code both in the page (to check cache and initiate fetch) and SW (to cache and return network response)
 
 ### Cache Strategies & "Routing"
- 
+- Pick a strategy based on the route, accept header, etc.
+- E.g., static cache stuff == cache only
+- Posts, changing data === network only
+
+### Cache cleanup
+- Sometimes may want to remove items from cache
+- To set a max cache size removing the oldest items do something like
+
+```
+function trimCache(cacheName, maxItems) {
+  caches.open(cacheName)
+  .then(function(cache) {
+    return cache.keys();
+  })
+  .then(function(keys) {
+    if (keys.length > maxItems) {
+      cache.delete(keys[0])
+      .then(trimCache(cacheName, maxItems));
+    }
+  });
+};
+```
+
+## Getting rid of a SW
+
+```
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations()
+  .then(function (registrations) {
+    for(var i = 0; i < registrations.length; i++) {
+      registrations[i].unregister();
+    }
+  });
+}
+```
