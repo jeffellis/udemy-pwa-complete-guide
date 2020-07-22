@@ -419,3 +419,90 @@ if ('serviceWorker' in navigator) {
 - Great overview over Strategies - the Offline Cookbook: https://jakearchibald.com/2014/offline-cookbook/
 - Advanced Caching Guide: https://afasterweb.com/2017/01/31/upgrading-your-service-worker-cache/
 - Mozilla Strategy Cookbook: https://serviceworke.rs/strategy-cache-and-update_service-worker_doc.html
+
+---
+# Section 7 - IndexedDB and Dynamic Data
+
+## Introducing IndexedDB
+- A transactional Key/Value database built into browser
+- Good for storing JSON and other dynamic content
+- Store significant amounts of usntructured data including Files/Blobs
+- Can be accessed asynchronously from UI code and SWs (unlike localStorage)
+- API is kind of clunky and callback based. Max recommends using the idb library from Jake Archibald to get a promise based implementation
+- IDB can be imported to service workers using something like: ```importScripts('/src/js/idb.js')```
+- Supported in pretty much all browsers, but if you want to check, look for ```window.indexedDB```
+
+### Open a database and create an object store (ie. table)
+
+- Save a promise to use when interacting with the db
+```
+var dbPromis = idb.open('posts-store', 1, function(db) {
+  if (!db.objectStoreNames.contains('posts')) {
+    db.createObjectStore('posts', {keyPath: 'id'});
+  }
+})
+```
+
+### Adding data to IndexedDB
+- Must be done in a transaction
+
+```
+function writeData(storeName, data) {
+  return dbPromise.then(function(db) {
+      var tx = db.transaction(storeName, 'readwrite');
+      var store = tx.objectStore(storeName);
+
+      // key will be determined from the keypath option 
+      store.put(data);
+      return tx.complete;
+  })
+}
+```
+
+### Retrieving data from IndexDB
+
+```
+function readAllData(st) {
+  return dbPromise
+    .then(function(db) {
+      var tx = db.transaction(st, 'readonly');
+      var store = tx.objectStore(st);
+      return store.getAll();
+    });
+}
+```
+
+### Clearing IDB & Handling Server-Client Mismatch
+- Using a function like readAllData will update any values that have changed in
+  records, but not reflect any records that have been moved.
+
+```
+function clearAllData(st) {
+  return dbPromise
+    .then(functions(db) {
+      var tx = db.transaction(st, 'readwrite');
+      var store = tx.objectStore(st);
+      store.clear();
+      return tx.complete;
+    });
+}
+```
+
+- Can also delete a single item
+```
+function deleteItemFromStore(st, id) {
+  return dbPromise
+    .then(function(db) {
+      var tx = db.transaction(st, 'readwrite');
+      var store = tx.objectStore(st);
+      store.delete(id);
+      return tx.complete;
+    })
+}
+```
+
+## Resources
+- IndexedDB Browser Support: http://caniuse.com/#feat=indexeddb
+- IDB on Github: https://github.com/jakearchibald/idb
+- IndexedDB explained on MDN: https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
+- Alternative to IDB: http://dexie.org/
