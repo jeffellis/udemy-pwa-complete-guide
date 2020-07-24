@@ -506,3 +506,17 @@ function deleteItemFromStore(st, id) {
 - IDB on Github: https://github.com/jakearchibald/idb
 - IndexedDB explained on MDN: https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
 - Alternative to IDB: http://dexie.org/
+
+
+---
+# Responsive Design
+- Media queries can drive styling based on screen sizes
+- srcset attribute on an <img> tag can give the browser a set of image choices 
+optimized for screen size:
+```
+<img src="/src/images/main-image.jpg"
+  srcset="/src/images/main-image-lg.jpg 1200w,
+          /src/images/main-image.jpg 900w"
+>
+```
+- Adding "user-scalable=no" to the content attribute on the ```<meta name="viewport">``` element prevents the user from zooming (pinching).
